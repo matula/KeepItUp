@@ -78,7 +78,7 @@ function scene:create( event )
 
     ball.alpha = 0.8
 
-    popAudio = audio.loadSound("pop.wav")
+    popAudio = audio.loadSound("pop.mp3")
 
     physics.addBody( platform, "static")
     physics.addBody( ball, "dynamic", {radius=50, bounce=0.5} )

@@ -10,7 +10,7 @@ local scene = composer.newScene()
 local titleText
 local button
 
-bgAudio = audio.loadSound( "04.wav" )
+bgAudio = audio.loadSound( "04.mp3" )
 bgAudioChannel = audio.play(bgAudio, {channel=1, loops=-1})
 audio.setVolume(0.60, {channel=1})
 
