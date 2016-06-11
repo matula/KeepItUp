@@ -49,7 +49,7 @@ function scene:create(event)
     }
 
     local highTimeOpt = {
-        text = "Max Time In Air: " .. highTime,
+        text = "Max Time Air Time: " .. highTime,
         x = _centerX,
         y = _centerY + 60,
         width = (_width - 80),
@@ -99,7 +99,7 @@ function scene:show(event)
     if (phase == "will") then
         directionsText.text = "Your Final Count: " .. finalCount
         highScoreText.text = "Your High Score: " .. highScore
-        highTimeText.text = "Max Time In Air: " .. highTime
+        highTimeText.text = "Max Time Air Time: " .. highTime
     elseif (phase == "did") then
         -- Code here runs when the scene is entirely on screen
     end

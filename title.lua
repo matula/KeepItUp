@@ -33,7 +33,7 @@ function scene:create(event)
     }
 
     local directions = {
-        text = "Tap the ball to keep it in the air. Don't let it touch the bottom.",
+        text = "Tap the ball to keep it in the air. Don't let it touch anything.",
         x = _centerX,
         y = _centerY,
         width = (_width - 80),
