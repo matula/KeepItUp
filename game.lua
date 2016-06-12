@@ -32,6 +32,7 @@ local function upTimeCounter()
 end
 
 local function spawnEnemy(params)
+    local mySize = 20
     local enemy = display.newRect(-30, _centerY, 20, 20)
     -- print('enemy spawned')
     enemy:setFillColor(0.4, 0.4, 0.4)
@@ -43,8 +44,8 @@ local function spawnEnemy(params)
     enemy.minY = 30
     enemy.y = params.y or math.random(enemy.minY, enemy.maxY)
     enemy.initY = enemy.y
-    enemy.width = params.width or 20
-    enemy.height = params.height or 20
+    enemy.width = params.width or mySize
+    enemy.height = params.height or mySize
     enemy.minSpeed = params.minSpeed or 1
     enemy.maxSpeed = params.maxSpeed or 3
     enemy.speed = math.random(enemy.minSpeed, enemy.maxSpeed)
@@ -55,7 +56,7 @@ local function spawnEnemy(params)
     enemy.maxAngle = params.maxAngle or 360
     enemy.angle = math.random(enemy.minAngle, enemy.maxAngle)
     enemy.myName = "enemy"
-    physics.addBody(enemy, "static", { radius = 20 })
+    physics.addBody(enemy, "static", { radius = mySize })
     return enemy
 end
 

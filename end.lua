@@ -2,6 +2,8 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
+local fontFile = "Futura-Medium.ttf"
+
 -- -----------------------------------------------------------------------------
 -- Code outside of the scene functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -20,12 +22,13 @@ end
 function scene:create(event)
 
     local sceneGroup = self.view
+
     local mainTitle = {
         text = "Keep It Up",
         x = _centerX,
         y = (_centerY - 100),
-        font = native.systemFont,
-        fontSize = 50
+        font = fontFile,
+        fontSize = 56
     }
 
     local directions = {
@@ -33,7 +36,7 @@ function scene:create(event)
         x = _centerX,
         y = _centerY,
         width = (_width - 80),
-        font = native.systemFont,
+        font = fontFile,
         fontSize = 20,
         align = "center"
     }
@@ -43,17 +46,17 @@ function scene:create(event)
         x = _centerX,
         y = _centerY + 30,
         width = (_width - 80),
-        font = native.systemFont,
+        font = fontFile,
         fontSize = 20,
         align = "center"
     }
 
     local highTimeOpt = {
-        text = "Max Time Air Time: " .. highTime,
+        text = "Max Air Time: " .. highTime,
         x = _centerX,
         y = _centerY + 60,
         width = (_width - 80),
-        font = native.systemFont,
+        font = fontFile,
         fontSize = 20,
         align = "center"
     }
@@ -99,7 +102,7 @@ function scene:show(event)
     if (phase == "will") then
         directionsText.text = "Your Final Count: " .. finalCount
         highScoreText.text = "Your High Score: " .. highScore
-        highTimeText.text = "Max Time Air Time: " .. highTime
+        highTimeText.text = "Max Air Time: " .. highTime
     elseif (phase == "did") then
         -- Code here runs when the scene is entirely on screen
     end

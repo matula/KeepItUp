@@ -1,19 +1,13 @@
 local composer = require("composer")
-
 local scene = composer.newScene()
-
--- -----------------------------------------------------------------------------
--- Code outside of the scene functions below will only be executed ONCE unless
--- the scene is removed entirely (not recycled) via "composer.removeScene()"
--- -----------------------------------------------------------------------------
 
 local titleText
 local button
+local fontFile = "Futura-Medium.ttf"
 
 bgAudio = audio.loadSound("04.mp3")
 bgAudioChannel = audio.play(bgAudio, { channel = 1, loops = -1 })
 audio.setVolume(0.60, { channel = 1 })
-
 
 local function loadNextScene()
     composer.gotoScene("game", { effect = "fade", time = 1000 })
@@ -28,8 +22,8 @@ function scene:create(event)
         text = "Keep It Up",
         x = _centerX,
         y = (_centerY - 100),
-        font = native.systemFont,
-        fontSize = 50
+        font = fontFile,
+        fontSize = 56
     }
 
     local directions = {
@@ -37,7 +31,7 @@ function scene:create(event)
         x = _centerX,
         y = _centerY,
         width = (_width - 80),
-        font = native.systemFont,
+        font = fontFile,
         fontSize = 20,
         align = "center"
     }
@@ -46,7 +40,7 @@ function scene:create(event)
         text = "start",
         x = _centerX,
         y = (_height - 10),
-        font = native.systemFont,
+        font = fontFile,
         fontSize = 20
     }
 
