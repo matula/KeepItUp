@@ -93,6 +93,11 @@ local function moveEnemyToLeft(self, event)
     end
 end
 
+local function movePlatform(self, event)
+    self.angle = self.angle + .1
+    self.y = self.initY + math.sin(self.angle) * 40
+end
+
 local function mainCounter()
     mainTime = mainTime + 1
     if (mainTime == 10) then
@@ -117,6 +122,11 @@ local function mainCounter()
         enemy4 = spawnEnemy({})
         enemy4.enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemy4)
+    end
+
+    if (mainTime == 45) then
+        platform.enterFrame = movePlatform
+        Runtime:addEventListener("enterFrame", platform)
     end
 end
 
@@ -242,6 +252,8 @@ function scene:create(event)
     platform = display.newRect(_centerX, (_height - 10), _width, 10)
     platform:setFillColor(0.3, 0.4, 0.7)
     platform.myName = "platform"
+    platform.initY = platform.y
+    platform.angle = 30
 
     ball = display.newCircle(_centerX, _centerY, 50)
     ball:setFillColor(0.9, 0.2, 0.2)
@@ -305,6 +317,7 @@ function scene:hide(event)
     if (phase == "will") then
         ball:removeEventListener("tap", pushBall)
         ball:removeEventListener("collision", ball)
+        Runtime:removeEventListener("enterFrame", platform)
     elseif (phase == "did") then
     end
 end
