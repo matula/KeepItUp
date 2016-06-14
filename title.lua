@@ -39,7 +39,7 @@ function scene:create(event)
     local nextButton = {
         text = "start",
         x = _centerX,
-        y = (_height - 10),
+        y = (_height - 40),
         font = fontFile,
         fontSize = 20
     }

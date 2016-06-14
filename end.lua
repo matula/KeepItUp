@@ -11,7 +11,7 @@ local fontFile = "Futura-Medium.ttf"
 
 
 local function loadNextScene()
-    composer.gotoScene("game", { effect = "fade", time = 1000 })
+    composer.gotoScene("game", { effect = "fade", time = 800 })
 end
 
 -- -----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ function scene:create(event)
     local nextButton = {
         text = "restart",
         x = _centerX,
-        y = (_height - 10),
+        y = (_height - 40),
         font = native.systemFont,
         fontSize = 20
     }

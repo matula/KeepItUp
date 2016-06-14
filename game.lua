@@ -4,7 +4,7 @@ local physics = require("physics")
 physics.start()
 
 local platform
-local enemy, enemy2, enemy3, enemy4
+local enemy, enemy2, enemy3, enemy4, enemy5
 local ball
 local popAudio
 local upTimeTimer
@@ -106,22 +106,28 @@ local function mainCounter()
         Runtime:addEventListener("enterFrame", enemy)
     end
 
-    if (mainTime == 15) then
+    if (mainTime == 20) then
         enemy2 = spawnEnemy({})
         enemy2.enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemy2)
     end
 
-    if (mainTime == 20) then
+    if (mainTime == 30) then
         enemy3 = spawnEnemy({})
         enemy3.enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemy3)
     end
 
-    if (mainTime == 30) then
+    if (mainTime == 40) then
         enemy4 = spawnEnemy({})
         enemy4.enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemy4)
+    end
+
+    if (mainTime == 50) then
+        enemy5 = spawnEnemy({})
+        enemy5.enterFrame = moveEnemyToRight
+        Runtime:addEventListener("enterFrame", enemy5)
     end
 
     if (mainTime == 45) then
@@ -178,6 +184,12 @@ local function onCollision(self, event)
                 enemy4 = nil
             end
 
+            if enemy5 then
+                Runtime:removeEventListener("enterFrame", enemy5)
+                enemy5:removeSelf()
+                enemy5 = nil
+            end
+
             finalCount = tapCount
             if (finalCount > highScore) then
                 highScore = finalCount
@@ -190,7 +202,7 @@ local function onCollision(self, event)
 
             resetCount()
 
-            composer.gotoScene("end", { effect = "fade", time = 1000 })
+            composer.gotoScene("end", { effect = "fade", time = 800 })
         end
 
         if (event.other.myName == "platform") then
@@ -219,6 +231,12 @@ local function onCollision(self, event)
                     enemy4 = nil
                 end
 
+                if enemy5 then
+                    Runtime:removeEventListener("enterFrame", enemy5)
+                    enemy5:removeSelf()
+                    enemy5 = nil
+                end
+
                 finalCount = tapCount
                 if (finalCount > highScore) then
                     highScore = finalCount
@@ -231,7 +249,7 @@ local function onCollision(self, event)
 
                 resetCount()
 
-                composer.gotoScene("end", { effect = "fade", time = 1000 })
+                composer.gotoScene("end", { effect = "fade", time = 800 })
             end
         end
         -- stop the counter
@@ -249,7 +267,7 @@ end
 function scene:create(event)
 
     local sceneGroup = self.view
-    platform = display.newRect(_centerX, (_height - 10), _width, 10)
+    platform = display.newRect(_centerX, (_height - 30), _width, 10)
     platform:setFillColor(0.3, 0.4, 0.7)
     platform.myName = "platform"
     platform.initY = platform.y
@@ -263,10 +281,10 @@ function scene:create(event)
 
     physics.addBody(platform, "static")
 
-    tapText = display.newText(tapCount, (_width - 24), 20, native.systemFont, 40)
+    tapText = display.newText(tapCount, (_width - 24), 40, native.systemFont, 40)
     tapText:setFillColor(0.8)
 
-    upTime = display.newText(counter, 10, 20, native.systemFont, 40)
+    upTime = display.newText(counter, 10, 40, native.systemFont, 40)
     upTime.anchorX = 0
     upTime:setFillColor(0.8)
 

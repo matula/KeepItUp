@@ -1,32 +1,23 @@
-application =
-{
+local normalW, normalH = 320, 480
 
-	content =
-	{
-		width = 320,
-		height = 480, 
-		scale = "letterBox",
-		fps = 30,
-		
-		--[[
-		imageSuffix =
-		{
-			    ["@2x"] = 2,
-		},
-		--]]
-	},
+if not display then return end -- This is needed for dekstop app
 
-	--[[
-	-- Push notifications
-	notification =
-	{
-		iphone =
-		{
-			types =
-			{
-				"badge", "sound", "alert", "newsstand"
-			}
-		}
-	},
-	--]]    
+-- This calculation extends the standard letterbox scaling
+-- Using this point x = 0, y = 0 is always in the top left corner of the screen on all devices
+-- And x = display.contentWidth, y = display.contentHeight is always in the bottom right corner
+local w, h = display.pixelWidth, display.pixelHeight
+local scale = math.max(normalW / w, normalH / h)
+w, h = w * scale, h * scale
+
+application = {
+    content = {
+        width = w,
+        height = h,
+        scale = 'portrait',
+        fps = 60,
+        --[[ imageSuffix = {
+            ['@2x'] = 1.1,
+            --['@4x'] = 2.1
+        } --]]
+    }
 }
