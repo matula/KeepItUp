@@ -5,7 +5,13 @@
 
 settings =
 {
-
+    plugins =
+    {
+        ["CoronaProvider.native.popup.social"] =
+        {
+            publisherId = "com.coronalabs"
+        },
+    },
 	orientation =
 	{
 		-- Supported values for orientation:

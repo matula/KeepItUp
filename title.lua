@@ -1,4 +1,5 @@
 local composer = require("composer")
+local widget = require("widget")
 local scene = composer.newScene()
 
 local titleText
@@ -6,11 +7,11 @@ local button
 local fontFile = "Futura-Medium.ttf"
 
 bgAudio = audio.loadSound("04.mp3")
-bgAudioChannel = audio.play(bgAudio, { channel = 1, loops = -1 })
+gAudioChannel = audio.play(bgAudio, { channel = 1, loops = -1 })
 audio.setVolume(0.60, { channel = 1 })
 
 local function loadNextScene()
-    composer.gotoScene("game", { effect = "fade", time = 1000 })
+    composer.gotoScene("game", { effect = "fade", time = 800 })
 end
 
 -- create()
@@ -53,10 +54,25 @@ function scene:create(event)
     sceneGroup:insert(titleText)
     sceneGroup:insert(directionsText)
 
-    button = display.newText(nextButton)
-    button:setFillColor(0.6, 0, 0)
-    button:addEventListener("tap", loadNextScene)
+    local button = widget.newButton({
+        label = "start",
+        onEvent = loadNextScene,
+        shape = "roundedRect",
+        width = 140,
+        height = 40,
+        cornerRadius = 5,
+        labelColor = { default = { 1, 1, 1 }, over = { 0.7, 0.7, 0.7 } },
+        fillColor = { default = { .8, 0, 0, .6 }, over = { .6, 0, 0, .7  } },
+        font = fontFile,
+        fontSize = 20
+    })
+
+    button.x = _centerX
+    button.y = (_height - 40)
+
     sceneGroup:insert(button)
+
+
 end
 
 

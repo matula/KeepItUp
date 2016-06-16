@@ -1,7 +1,6 @@
 local composer = require("composer")
-
 local scene = composer.newScene()
-
+local widget = require("widget")
 local fontFile = "Futura-Medium.ttf"
 
 -- -----------------------------------------------------------------------------
@@ -9,9 +8,37 @@ local fontFile = "Futura-Medium.ttf"
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------
 
-
 local function loadNextScene()
+    print('back to game')
     composer.gotoScene("game", { effect = "fade", time = 800 })
+end
+
+local function onShareButtonReleased(event)
+    local serviceName = event.target.id
+    local isAvailable = native.canShowPopup("social", serviceName)
+
+    -- If it is possible to show the popup
+    if isAvailable then
+        local listener = {}
+        function listener:popup(event)
+            print("name(" .. event.name .. ") type(" .. event.type .. ") action(" .. tostring(event.action) .. ") limitReached(" .. tostring(event.limitReached) .. ")")
+        end
+
+        -- Show the popup
+        native.showPopup("social",
+            {
+                service = serviceName, -- The service key is ignored on Android.
+                message = "I scored " .. finalCount .. " on Keep It Up! Beat that!!!",
+                listener = listener,
+                url =
+                {
+                    "http://www.matu.la/keep-it-up/",
+                }
+            })
+    else
+        -- Popup isn't available.. Show error message
+        native.showAlert("Cannot send " .. serviceName .. " message.", "Please setup your " .. serviceName .. " account or check your network connection (on android this means that the package/app (ie Twitter) is not installed on the device)", { "OK" })
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -20,8 +47,9 @@ end
 
 -- create()
 function scene:create(event)
-
+    print('start create end scene')
     local sceneGroup = self.view
+    print('start create end scene group')
 
     local mainTitle = {
         text = "Keep It Up",
@@ -61,6 +89,7 @@ function scene:create(event)
         align = "center"
     }
 
+
     titleText = display.newText(mainTitle)
     titleText:setFillColor(0.5)
 
@@ -72,24 +101,49 @@ function scene:create(event)
 
     highTimeText = display.newText(highTimeOpt)
     highTimeText:setFillColor(0.5)
+    print(' end scene texts')
+
+    local button = widget.newButton({
+        label = "restart",
+        onRelease = loadNextScene,
+        shape = "roundedRect",
+        width = 140,
+        height = 40,
+        cornerRadius = 5,
+        labelColor = { default = { 1, 1, 1 }, over = { 0.7, 0.7, 0.7 } },
+        fillColor = { default = { .8, 0, 0, .6 }, over = { .6, 0, 0, .7 } },
+        font = fontFile,
+        fontSize = 20
+    })
+    button.x = _centerX
+    button.y = (_height - 40)
+
+    local shareButton = widget.newButton {
+        id = "share",
+        width = 140,
+        height = 36,
+        label = "share your score",
+        onRelease = onShareButtonReleased,
+        shape = "roundedRect",
+        cornerRadius = 5,
+        labelColor = { default = { 1, 1, 1 }, over = { 0.7, 0.7, 0.7 } },
+        fillColor = { default = { 0.2, 0.2, 0.9, .6 }, over = { .2, 0.2, 0.9, .9 } },
+        font = fontFile,
+        fontSize = 16
+    }
+    shareButton.x = _centerX
+    shareButton.y = (_height - 100)
+
+    print('end scene widget')
 
     sceneGroup:insert(titleText)
     sceneGroup:insert(directionsText)
     sceneGroup:insert(highScoreText)
     sceneGroup:insert(highTimeText)
-
-    local nextButton = {
-        text = "restart",
-        x = _centerX,
-        y = (_height - 40),
-        font = native.systemFont,
-        fontSize = 20
-    }
-
-    button = display.newText(nextButton)
-    button:setFillColor(0.6, 0, 0)
-    button:addEventListener("tap", loadNextScene)
     sceneGroup:insert(button)
+    sceneGroup:insert(shareButton)
+
+    print('end scene added group')
 end
 
 
@@ -98,13 +152,14 @@ function scene:show(event)
 
     local sceneGroup = self.view
     local phase = event.phase
-
+    print('end scene SHOW')
     if (phase == "will") then
+        print('end scene show WILL')
         directionsText.text = "Your Final Count: " .. finalCount
         highScoreText.text = "Your High Score: " .. highScore
         highTimeText.text = "Max Air Time: " .. highTime
     elseif (phase == "did") then
-        -- Code here runs when the scene is entirely on screen
+        print('end scene show DID')
     end
 end
 

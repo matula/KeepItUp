@@ -3,8 +3,8 @@ local scene = composer.newScene()
 local physics = require("physics")
 physics.start()
 
-local platform
-local enemy, enemy2, enemy3, enemy4, enemy5
+local platform, topborder
+local enemies = {}
 local ball
 local popAudio
 local upTimeTimer
@@ -101,33 +101,33 @@ end
 local function mainCounter()
     mainTime = mainTime + 1
     if (mainTime == 10) then
-        enemy = spawnEnemy({ y = _centerY })
-        enemy.enterFrame = moveEnemyToRight
-        Runtime:addEventListener("enterFrame", enemy)
+        enemies[1] = spawnEnemy({ y = _centerY })
+        enemies[1].enterFrame = moveEnemyToRight
+        Runtime:addEventListener("enterFrame", enemies[1])
     end
 
     if (mainTime == 20) then
-        enemy2 = spawnEnemy({})
-        enemy2.enterFrame = moveEnemyToLeft
-        Runtime:addEventListener("enterFrame", enemy2)
+        enemies[2] = spawnEnemy({})
+        enemies[2].enterFrame = moveEnemyToLeft
+        Runtime:addEventListener("enterFrame", enemies[2])
     end
 
     if (mainTime == 30) then
-        enemy3 = spawnEnemy({})
-        enemy3.enterFrame = moveEnemyToLeft
-        Runtime:addEventListener("enterFrame", enemy3)
+        enemies[3] = spawnEnemy({})
+        enemies[3].enterFrame = moveEnemyToLeft
+        Runtime:addEventListener("enterFrame", enemies[3])
     end
 
     if (mainTime == 40) then
-        enemy4 = spawnEnemy({})
-        enemy4.enterFrame = moveEnemyToRight
-        Runtime:addEventListener("enterFrame", enemy4)
+        enemies[4] = spawnEnemy({})
+        enemies[4].enterFrame = moveEnemyToRight
+        Runtime:addEventListener("enterFrame", enemies[4])
     end
 
     if (mainTime == 50) then
-        enemy5 = spawnEnemy({})
-        enemy5.enterFrame = moveEnemyToRight
-        Runtime:addEventListener("enterFrame", enemy5)
+        enemies[5] = spawnEnemy({})
+        enemies[5].enterFrame = moveEnemyToRight
+        Runtime:addEventListener("enterFrame", enemies[5])
     end
 
     if (mainTime == 45) then
@@ -136,8 +136,11 @@ local function mainCounter()
     end
 end
 
-local function pushBall()
-    audio.play(popAudio, { channel = 2, loops = 0 })
+local function pushBall(event)
+    print('screen tapped')
+    print('start pop')
+    audio.play(popAudio, { channel = 3, loops = 0 })
+    print('end pop')
 
     if upTimeTimer then
         if (counter > highTime) then
@@ -145,14 +148,40 @@ local function pushBall()
         end
         timer.cancel(upTimeTimer)
     end
+
     counter = 0
     ball:applyLinearImpulse(0, -0.75, ball.x, ball.y)
+    print('pre tap count:' .. tapCount)
     tapCount = tapCount + 1
+    print('post tap count:'  .. tapCount)
     tapText.text = tapCount
     upTimeTimer = timer.performWithDelay(10, upTimeCounter, 0)
 end
 
+local function goToEndScene()
+    if (tapCount > 0) then
+        Runtime:removeEventListener("tap", pushBall)
+        for enemyKey, enemyValue in pairs(enemies) do
+            Runtime:removeEventListener("enterFrame", enemies[enemyKey])
+            enemies[enemyKey]:removeSelf()
+            enemies[enemyKey] = nil
+        end
 
+        finalCount = tapCount
+        if (finalCount > highScore) then
+            highScore = finalCount
+        end
+
+        if (mainTime > 0) then
+            timer.cancel(mainTimer)
+            mainTime = 0
+        end
+
+        resetCount()
+
+        composer.gotoScene("end", { effect = "fade", time = 800 })
+    end
+end
 
 
 local function onCollision(self, event)
@@ -160,106 +189,23 @@ local function onCollision(self, event)
         if (event.other.myName == "enemy") then
             transition.fadeOut(ball, { time = 500 })
             transition.scaleTo(ball, { xScale = 2, yScale = 2, time = 800 })
-
-            if enemy then
-                Runtime:removeEventListener("enterFrame", enemy)
-                enemy:removeSelf()
-                enemy = nil
-            end
-            if enemy2 then
-                Runtime:removeEventListener("enterFrame", enemy2)
-                enemy2:removeSelf()
-                enemy2 = nil
-            end
-
-            if enemy3 then
-                Runtime:removeEventListener("enterFrame", enemy3)
-                enemy3:removeSelf()
-                enemy3 = nil
-            end
-
-            if enemy4 then
-                Runtime:removeEventListener("enterFrame", enemy4)
-                enemy4:removeSelf()
-                enemy4 = nil
-            end
-
-            if enemy5 then
-                Runtime:removeEventListener("enterFrame", enemy5)
-                enemy5:removeSelf()
-                enemy5 = nil
-            end
-
-            finalCount = tapCount
-            if (finalCount > highScore) then
-                highScore = finalCount
-            end
-
-            if (mainTime > 0) then
-                timer.cancel(mainTimer)
-                mainTime = 0
-            end
-
-            resetCount()
-
-            composer.gotoScene("end", { effect = "fade", time = 800 })
+            goToEndScene()
         end
 
         if (event.other.myName == "platform") then
+            goToEndScene()
+        end
 
-            if (tapCount > 0) then
-                if enemy then
-                    Runtime:removeEventListener("enterFrame", enemy)
-                    enemy:removeSelf()
-                    enemy = nil
-                end
-                if enemy2 then
-                    Runtime:removeEventListener("enterFrame", enemy2)
-                    enemy2:removeSelf()
-                    enemy2 = nil
-                end
-
-                if enemy3 then
-                    Runtime:removeEventListener("enterFrame", enemy3)
-                    enemy3:removeSelf()
-                    enemy3 = nil
-                end
-
-                if enemy4 then
-                    Runtime:removeEventListener("enterFrame", enemy4)
-                    enemy4:removeSelf()
-                    enemy4 = nil
-                end
-
-                if enemy5 then
-                    Runtime:removeEventListener("enterFrame", enemy5)
-                    enemy5:removeSelf()
-                    enemy5 = nil
-                end
-
-                finalCount = tapCount
-                if (finalCount > highScore) then
-                    highScore = finalCount
-                end
-
-                if (mainTime > 0) then
-                    timer.cancel(mainTimer)
-                    mainTime = 0
-                end
-
-                resetCount()
-
-                composer.gotoScene("end", { effect = "fade", time = 800 })
+        if not (event.other.myName == "topborder") then
+            -- stop the counter
+            if upTimeTimer then
+                timer.cancel(upTimeTimer)
             end
-        end
-        -- stop the counter
-        if upTimeTimer then
-            timer.cancel(upTimeTimer)
-        end
-        -- stop main timer
+            -- stop main timer
 
-        counter = 0
-        upTime.text = 0
+            counter = 0
+            upTime.text = 0
+        end
     end
 end
 
@@ -267,11 +213,17 @@ end
 function scene:create(event)
 
     local sceneGroup = self.view
+    Runtime:removeEventListener("tap", pushBall)
+
     platform = display.newRect(_centerX, (_height - 30), _width, 10)
     platform:setFillColor(0.3, 0.4, 0.7)
     platform.myName = "platform"
     platform.initY = platform.y
     platform.angle = 30
+
+    topborder = display.newRect(_centerX, -10, (_width + 100), 10)
+    topborder:setFillColor(0.9, 0.9, 0.9)
+    topborder.myName = "topborder"
 
     ball = display.newCircle(_centerX, _centerY, 50)
     ball:setFillColor(0.9, 0.2, 0.2)
@@ -280,6 +232,7 @@ function scene:create(event)
     popAudio = audio.loadSound("pop.mp3")
 
     physics.addBody(platform, "static")
+    physics.addBody(topborder, "static", { bounce = 0.0 })
 
     tapText = display.newText(tapCount, (_width - 24), 40, native.systemFont, 40)
     tapText:setFillColor(0.8)
@@ -288,9 +241,8 @@ function scene:create(event)
     upTime.anchorX = 0
     upTime:setFillColor(0.8)
 
-
-
     sceneGroup:insert(platform)
+    sceneGroup:insert(topborder)
     sceneGroup:insert(ball)
     sceneGroup:insert(tapText)
     sceneGroup:insert(upTime)
@@ -308,6 +260,8 @@ function scene:show(event)
             physics.removeBody(ball)
         end
 
+        Runtime:removeEventListener("tap", pushBall)
+
         ball.x = _centerX
         ball.y = _height - 70
         ball.xScale = 1
@@ -319,7 +273,9 @@ function scene:show(event)
         if (mainTime == 0) then
             mainTimer = timer.performWithDelay(1000, mainCounter, 0)
         end
-        ball:addEventListener("tap", pushBall)
+
+        Runtime:addEventListener("tap", pushBall)
+        -- ball:addEventListener("tap", pushBall)
         ball.collision = onCollision
         ball:addEventListener("collision", ball)
     end
@@ -331,11 +287,12 @@ function scene:hide(event)
 
     local sceneGroup = self.view
     local phase = event.phase
+    Runtime:removeEventListener("tap", pushBall)
 
     if (phase == "will") then
-        ball:removeEventListener("tap", pushBall)
         ball:removeEventListener("collision", ball)
         Runtime:removeEventListener("enterFrame", platform)
+
     elseif (phase == "did") then
     end
 end
