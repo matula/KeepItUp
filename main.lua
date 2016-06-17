@@ -9,6 +9,5 @@ composer.gotoScene("title")
 
 --[[
 ideas
-* move platform up and down after a while
 * modes - "endurance" = no enemies, "challenge" = with enemies
  ]]

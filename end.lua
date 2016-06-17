@@ -9,7 +9,6 @@ local fontFile = "Futura-Medium.ttf"
 -- -----------------------------------------------------------------------------
 
 local function loadNextScene()
-    print('back to game')
     composer.gotoScene("game", { effect = "fade", time = 800 })
 end
 
@@ -32,7 +31,7 @@ local function onShareButtonReleased(event)
                 listener = listener,
                 url =
                 {
-                    "http://www.matu.la/keep-it-up/",
+                    "http://www.matu.la/keep-it-up",
                 }
             })
     else
@@ -47,9 +46,7 @@ end
 
 -- create()
 function scene:create(event)
-    print('start create end scene')
     local sceneGroup = self.view
-    print('start create end scene group')
 
     local mainTitle = {
         text = "Keep It Up",
@@ -101,7 +98,6 @@ function scene:create(event)
 
     highTimeText = display.newText(highTimeOpt)
     highTimeText:setFillColor(0.5)
-    print(' end scene texts')
 
     local button = widget.newButton({
         label = "restart",
@@ -134,8 +130,6 @@ function scene:create(event)
     shareButton.x = _centerX
     shareButton.y = (_height - 100)
 
-    print('end scene widget')
-
     sceneGroup:insert(titleText)
     sceneGroup:insert(directionsText)
     sceneGroup:insert(highScoreText)
@@ -143,7 +137,6 @@ function scene:create(event)
     sceneGroup:insert(button)
     sceneGroup:insert(shareButton)
 
-    print('end scene added group')
 end
 
 
@@ -152,14 +145,11 @@ function scene:show(event)
 
     local sceneGroup = self.view
     local phase = event.phase
-    print('end scene SHOW')
     if (phase == "will") then
-        print('end scene show WILL')
         directionsText.text = "Your Final Count: " .. finalCount
         highScoreText.text = "Your High Score: " .. highScore
         highTimeText.text = "Max Air Time: " .. highTime
     elseif (phase == "did") then
-        print('end scene show DID')
     end
 end
 

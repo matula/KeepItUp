@@ -8,7 +8,7 @@ local fontFile = "Futura-Medium.ttf"
 
 bgAudio = audio.loadSound("04.mp3")
 gAudioChannel = audio.play(bgAudio, { channel = 1, loops = -1 })
-audio.setVolume(0.60, { channel = 1 })
+audio.setVolume(0.00, { channel = 1 })
 
 local function loadNextScene()
     composer.gotoScene("game", { effect = "fade", time = 800 })
@@ -37,14 +37,6 @@ function scene:create(event)
         align = "center"
     }
 
-    local nextButton = {
-        text = "start",
-        x = _centerX,
-        y = (_height - 40),
-        font = fontFile,
-        fontSize = 20
-    }
-
     titleText = display.newText(mainTitle)
     titleText:setFillColor(0.5)
 
@@ -62,7 +54,7 @@ function scene:create(event)
         height = 40,
         cornerRadius = 5,
         labelColor = { default = { 1, 1, 1 }, over = { 0.7, 0.7, 0.7 } },
-        fillColor = { default = { .8, 0, 0, .6 }, over = { .6, 0, 0, .7  } },
+        fillColor = { default = { .8, 0, 0, .6 }, over = { .6, 0, 0, .7 } },
         font = fontFile,
         fontSize = 20
     })
@@ -71,8 +63,6 @@ function scene:create(event)
     button.y = (_height - 40)
 
     sceneGroup:insert(button)
-
-
 end
 
 

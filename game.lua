@@ -6,6 +6,7 @@ physics.start()
 local platform, topborder
 local enemies = {}
 local ball
+local powerUp
 local popAudio
 local upTimeTimer
 local mainTimer
@@ -60,9 +61,31 @@ local function spawnEnemy(params)
     return enemy
 end
 
+local function spawnStar()
+    local starVertices = { 0, -23, 6, -8, 26, -6, 10, 4, 16, 22, 0, 11, -16, 22, -10, 3, -26, -8, -6, -8, }
+    local starPowerUp = display.newPolygon(-50, _centerY, starVertices)
+    starPowerUp:setFillColor(.9, .9, 0)
+    starPowerUp.myName = "starpower"
+    starPowerUp.angle = math.random(1, 360)
+    starPowerUp.amp = math.random(5, 50)
+    starPowerUp.isScaling = false
+    physics.addBody(starPowerUp, "static", { radius = 20 })
+    return starPowerUp
+end
+
+local function moveStarRight(self, event)
+    if (self.x >= (_width + 50)) then
+        display.remove(self)
+        Runtime:removeEventListener("enterFrame", powerUp)
+    else
+        self.x = self.x + 2
+        self.angle = self.angle + .1
+        self.y = (_height - 150) + math.sin(self.angle) * self.amp
+    end
+end
+
 local function moveEnemyToRight(self, event)
     if (self.x >= (_width + 50)) then
-        print('reset to right')
         self.x = -50
         self.y = math.random(self.minY, self.maxY)
         self.initY = self.y
@@ -79,7 +102,6 @@ end
 local function moveEnemyToLeft(self, event)
 
     if (self.x <= -50) then
-        print('reset to left')
         self.x = (_width + 50)
         self.y = math.random(self.minY, self.maxY)
         self.initY = self.y
@@ -93,6 +115,24 @@ local function moveEnemyToLeft(self, event)
     end
 end
 
+local function changeBallPhysics(self)
+    physics.removeBody(ball)
+    physics.addBody(ball, "dynamic", { radius = 25, bounce = 0.3 })
+    ball.linearImpulse = -0.3
+end
+
+local function preCollisionEvent(self, event)
+    if (event.other.myName == "starpower") then
+        event.contact.isEnabled = false
+        if not (event.other.isScaling) then
+            event.other.isScaling = true
+            transition.to(ball, { time = 500, xScale = 0.5, yScale = .5, onComplete = changeBallPhysics })
+        end
+    end
+end
+
+
+
 local function movePlatform(self, event)
     self.angle = self.angle + .1
     self.y = self.initY + math.sin(self.angle) * 40
@@ -100,32 +140,40 @@ end
 
 local function mainCounter()
     mainTime = mainTime + 1
+    local showStarChance = math.random(1, 500)
+    if (mainTime > 25) then
+        if (showStarChance == 250) then
+            powerUp = spawnStar()
+            powerUp.enterFrame = moveStarRight
+            Runtime:addEventListener("enterFrame", powerUp)
+        end
+    end
     if (mainTime == 10) then
-        enemies[1] = spawnEnemy({ y = _centerY })
+        enemies[1] = spawnEnemy({ y = _centerY, minSpeed = 1, maxSpeed = 1, minAmp = 2, maxAmp = 10 })
         enemies[1].enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemies[1])
     end
 
     if (mainTime == 20) then
-        enemies[2] = spawnEnemy({})
+        enemies[2] = spawnEnemy({ y = 0, minSpeed = 1, maxSpeed = 3 })
         enemies[2].enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemies[2])
     end
 
     if (mainTime == 30) then
-        enemies[3] = spawnEnemy({})
+        enemies[3] = spawnEnemy({ minSpeed = 2, maxSpeed = 3 })
         enemies[3].enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemies[3])
     end
 
     if (mainTime == 40) then
-        enemies[4] = spawnEnemy({})
+        enemies[4] = spawnEnemy({ minSpeed = 2, maxSpeed = 4 })
         enemies[4].enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemies[4])
     end
 
     if (mainTime == 50) then
-        enemies[5] = spawnEnemy({})
+        enemies[5] = spawnEnemy({ minSpeed = 3, maxSpeed = 5 })
         enemies[5].enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemies[5])
     end
@@ -137,10 +185,7 @@ local function mainCounter()
 end
 
 local function pushBall(event)
-    print('screen tapped')
-    print('start pop')
     audio.play(popAudio, { channel = 3, loops = 0 })
-    print('end pop')
 
     if upTimeTimer then
         if (counter > highTime) then
@@ -150,21 +195,21 @@ local function pushBall(event)
     end
 
     counter = 0
-    ball:applyLinearImpulse(0, -0.75, ball.x, ball.y)
-    print('pre tap count:' .. tapCount)
+    ball:applyLinearImpulse(0, ball.linearImpulse, ball.x, ball.y)
     tapCount = tapCount + 1
-    print('post tap count:'  .. tapCount)
     tapText.text = tapCount
     upTimeTimer = timer.performWithDelay(10, upTimeCounter, 0)
 end
 
 local function goToEndScene()
     if (tapCount > 0) then
-        Runtime:removeEventListener("tap", pushBall)
+
         for enemyKey, enemyValue in pairs(enemies) do
-            Runtime:removeEventListener("enterFrame", enemies[enemyKey])
-            enemies[enemyKey]:removeSelf()
-            enemies[enemyKey] = nil
+            if enemies[enemyKey] then
+                Runtime:removeEventListener("enterFrame", enemies[enemyKey])
+                enemies[enemyKey]:removeSelf()
+                enemies[enemyKey] = nil
+            end
         end
 
         finalCount = tapCount
@@ -214,6 +259,7 @@ function scene:create(event)
 
     local sceneGroup = self.view
     Runtime:removeEventListener("tap", pushBall)
+    Runtime:removeEventListener("tap")
 
     platform = display.newRect(_centerX, (_height - 30), _width, 10)
     platform:setFillColor(0.3, 0.4, 0.7)
@@ -228,6 +274,7 @@ function scene:create(event)
     ball = display.newCircle(_centerX, _centerY, 50)
     ball:setFillColor(0.9, 0.2, 0.2)
     ball.alpha = 0.8
+    ball.linearImpulse = -0.75
 
     popAudio = audio.loadSound("pop.mp3")
 
@@ -256,17 +303,17 @@ function scene:show(event)
     local phase = event.phase
 
     if (phase == "will") then
+        Runtime:removeEventListener("tap", pushBall)
         if ball.setLinearVelocity and type(ball.setLinearVelocity) == "function" then
             physics.removeBody(ball)
         end
-
-        Runtime:removeEventListener("tap", pushBall)
 
         ball.x = _centerX
         ball.y = _height - 70
         ball.xScale = 1
         ball.yScale = 1
         ball.alpha = 0.8
+        ball.linearImpulse = -0.75
         physics.addBody(ball, "dynamic", { radius = 50, bounce = 0.5 })
         finalCount = 0
     elseif (phase == "did") then
@@ -275,9 +322,10 @@ function scene:show(event)
         end
 
         Runtime:addEventListener("tap", pushBall)
-        -- ball:addEventListener("tap", pushBall)
         ball.collision = onCollision
         ball:addEventListener("collision", ball)
+        ball.preCollision = preCollisionEvent
+        ball:addEventListener("preCollision", ball)
     end
 end
 
