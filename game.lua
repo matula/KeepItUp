@@ -15,6 +15,7 @@ local tapCount = 0
 local tapText
 local counter = 0
 local upTime
+local isEnding = false
 finalCount = 0
 highScore = 0
 highTime = 0
@@ -25,6 +26,7 @@ highTime = 0
 local function resetCount()
     tapText.text = 0
     tapCount = 0
+    mainTime = 0
 end
 
 local function upTimeCounter()
@@ -131,42 +133,51 @@ local function preCollisionEvent(self, event)
     end
 end
 
-
-
 local function movePlatform(self, event)
     self.angle = self.angle + .1
     self.y = self.initY + math.sin(self.angle) * 40
 end
 
 local function mainCounter()
+    print(isEnding)
+    if isEnding then
+        mainTime = 0
+    end
+
+    if (tapCount == 0) then
+        mainTime = 0
+    end
+
     mainTime = mainTime + 1
-    local showStarChance = math.random(1, 500)
+    local showStarChance = math.random(1, 5)
     if (mainTime > 25) then
-        if (showStarChance == 250) then
-            powerUp = spawnStar()
-            powerUp.enterFrame = moveStarRight
-            Runtime:addEventListener("enterFrame", powerUp)
+        if not powerUp then
+            if (showStarChance == 5) then
+                powerUp = spawnStar()
+                powerUp.enterFrame = moveStarRight
+                Runtime:addEventListener("enterFrame", powerUp)
+            end
         end
     end
-    if (mainTime == 10) then
+    if (mainTime == 6) then
         enemies[1] = spawnEnemy({ y = _centerY, minSpeed = 1, maxSpeed = 1, minAmp = 2, maxAmp = 10 })
         enemies[1].enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemies[1])
     end
 
-    if (mainTime == 20) then
+    if (mainTime == 15) then
         enemies[2] = spawnEnemy({ y = 0, minSpeed = 1, maxSpeed = 3 })
         enemies[2].enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemies[2])
     end
 
-    if (mainTime == 30) then
+    if (mainTime == 26) then
         enemies[3] = spawnEnemy({ minSpeed = 2, maxSpeed = 3 })
         enemies[3].enterFrame = moveEnemyToLeft
         Runtime:addEventListener("enterFrame", enemies[3])
     end
 
-    if (mainTime == 40) then
+    if (mainTime == 38) then
         enemies[4] = spawnEnemy({ minSpeed = 2, maxSpeed = 4 })
         enemies[4].enterFrame = moveEnemyToRight
         Runtime:addEventListener("enterFrame", enemies[4])
@@ -186,6 +197,10 @@ end
 
 local function pushBall(event)
     audio.play(popAudio, { channel = 3, loops = 0 })
+    print(mainTime)
+    if (mainTime == 0) then
+        mainTimer = timer.performWithDelay(1000, mainCounter, 0)
+    end
 
     if upTimeTimer then
         if (counter > highTime) then
@@ -202,7 +217,11 @@ local function pushBall(event)
 end
 
 local function goToEndScene()
-    if (tapCount > 0) then
+    if isEnding then
+        if mainTimer then
+            timer.cancel(mainTimer)
+            mainTimer = nil
+        end
 
         for enemyKey, enemyValue in pairs(enemies) do
             if enemies[enemyKey] then
@@ -217,14 +236,9 @@ local function goToEndScene()
             highScore = finalCount
         end
 
-        if (mainTime > 0) then
-            timer.cancel(mainTimer)
-            mainTime = 0
-        end
-
         resetCount()
 
-        composer.gotoScene("end", { effect = "fade", time = 800 })
+        composer.gotoScene("end", { effect = "fade", time = 400 })
     end
 end
 
@@ -232,13 +246,22 @@ end
 local function onCollision(self, event)
     if (event.phase == "began") then
         if (event.other.myName == "enemy") then
-            transition.fadeOut(ball, { time = 500 })
-            transition.scaleTo(ball, { xScale = 2, yScale = 2, time = 800 })
-            goToEndScene()
+            if not isEnding then
+                isEnding = true
+                transition.fadeOut(ball, { time = 500 })
+                transition.scaleTo(ball, { xScale = 2, yScale = 2, time = 800 })
+                goToEndScene()
+            end
         end
 
         if (event.other.myName == "platform") then
-            goToEndScene()
+            if (tapCount > 0) then
+                if not isEnding then
+                    isEnding = true
+                    print('hit platform. ending')
+                    goToEndScene()
+                end
+            end
         end
 
         if not (event.other.myName == "topborder") then
@@ -317,11 +340,8 @@ function scene:show(event)
         physics.addBody(ball, "dynamic", { radius = 50, bounce = 0.5 })
         finalCount = 0
     elseif (phase == "did") then
-        if (mainTime == 0) then
-            mainTimer = timer.performWithDelay(1000, mainCounter, 0)
-        end
-
         Runtime:addEventListener("tap", pushBall)
+        isEnding = false
         ball.collision = onCollision
         ball:addEventListener("collision", ball)
         ball.preCollision = preCollisionEvent
@@ -336,11 +356,13 @@ function scene:hide(event)
     local sceneGroup = self.view
     local phase = event.phase
     Runtime:removeEventListener("tap", pushBall)
+    if mainTimer then
+        timer.cancel(mainTimer)
+    end
 
     if (phase == "will") then
         ball:removeEventListener("collision", ball)
         Runtime:removeEventListener("enterFrame", platform)
-
     elseif (phase == "did") then
     end
 end

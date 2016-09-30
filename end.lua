@@ -9,7 +9,7 @@ local fontFile = "Futura-Medium.ttf"
 -- -----------------------------------------------------------------------------
 
 local function loadNextScene()
-    composer.gotoScene("game", { effect = "fade", time = 800 })
+    composer.gotoScene("game", { effect = "fade", time = 400 })
 end
 
 local function onShareButtonReleased(event)
